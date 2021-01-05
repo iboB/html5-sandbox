@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Single Page Navigation</title>
+    <meta name="description" content="Allow navigation within a single page">
+    <meta name="author" content="Borislav Stanimirov">
+</head>
+<body>
+    <div id="load">
+        <input type="file" id="load-file">
+    </div>
+    <div id="show">
+    </div>
+    <script>
+        const loader = document.getElementById('load-file');
+        loader.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            window.location.href = '#';
+
+            const reader = new FileReader();
+            reader.addEventListener('load', (event) => {
+                const text = event.target.result;
+                show.innerHTML = '<code>' + text + '</code>';
+            })
+            reader.readAsText(file);
+        });
+
+        window.onpopstate = (event) => {
+            const load = document.getElementById('load');
+            const show = document.getElementById('show');
+
+            if (document.location.href.indexOf('#') == -1) {
+                load.style.display = 'block';
+                show.style.display = 'none';
+            }
+            else {
+                load.style.display = 'none';
+                show.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
