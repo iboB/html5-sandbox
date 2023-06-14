@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>WebGPU</title>
+    <meta name="description" content="WebGPU experiments">
+    <meta name="author" content="Borislav Stanimirov">
+</head>
+<body>
+    <div id="info">Loading</div>
+    <div id="more"></div>
+    <script>
+        const info = document.getElementById('info');
+        const more = document.getElementById('more');
+
+        async function main() {
+            const adapter = await navigator.gpu.requestAdapter();
+            info.innerHTML = 'Adapter found';
+            more.innerHTML = JSON.stringify({maxBuf: adapter.limits.maxBufferSize}, null, 2);
+            const adapterInfo = await adapter.requestAdapterInfo();
+            more.innerHTML = JSON.stringify([adapterInfo.vendor, adapterInfo.architecture], null, 2);
+            const device = await adapter.requestDevice();
+            info.innerHTML = 'Device found';
+
+            const bufA = device.createBuffer({
+                mappedAtCreation: true,
+                size: 4,
+                usage: GPUBufferUsage.MAP_WRITE | GPUBufferUsage.COPY_SRC
+            });
+            new Uint8Array(bufA.getMappedRange()).set([0, 1, 2, 3]);
+            bufA.unmap();
+
+            const gpuReadBuffer = device.createBuffer({
+                size: 4,
+                usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+            });
+
+            const copyEncoder = device.createCommandEncoder();
+            copyEncoder.copyBufferToBuffer(
+                bufA /* source buffer */,
+                0 /* source offset */,
+                gpuReadBuffer /* destination buffer */,
+                0 /* destination offset */,
+                4 /* size */
+            );
+
+            // Submit copy commands.
+            const copyCommands = copyEncoder.finish();
+            device.queue.submit([copyCommands]);
+
+            // Read buffer.
+            await gpuReadBuffer.mapAsync(GPUMapMode.READ);
+            const copyArrayBuffer = gpuReadBuffer.getMappedRange();
+            more.innerHTML = JSON.stringify(new Uint8Array(copyArrayBuffer), null, 2);
+
+        }
+
+        main();
+    </script>
+</body>
+</html>
