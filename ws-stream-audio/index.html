@@ -14,15 +14,22 @@
             latencyHint: 'interactive',
             sampleRate: 24000,
         });
+        let audioWorklet = null;
 
         async function playAudio() {
             await actx.audioWorklet.addModule('stream-worklet.js');
-            const producer = new AudioWorkletNode(actx, 'stream-worklet');
-            producer.connect(actx.destination);
+            audioWorklet = new AudioWorkletNode(actx, 'stream-worklet');
+            audioWorklet.connect(actx.destination);
         };
 
         async function begin() {
+            let asset = await fetch('a-f32le-24k.araw');
+            let buf = await asset.arrayBuffer();
+
             await playAudio();
+
+            audioWorklet.port.postMessage(buf, [buf]);
+
             actx.resume();
         }
 
