@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>WS Audio Stream</title>
+    <meta name="description" content="Experiments with audio streaming over WebSocket">
+    <meta name="author" content="Borislav Stanimirov">
+</head>
+<body>
+    <button style="font-size: 1.3em" id="but-begin">Begin</button>
+
+    <script>
+        const actx = new AudioContext({
+            latencyHint: 'interactive',
+            sampleRate: 24000,
+        });
+
+        async function playAudio() {
+            await actx.audioWorklet.addModule('stream-worklet.js');
+            const producer = new AudioWorkletNode(actx, 'stream-worklet');
+            producer.connect(actx.destination);
+        };
+
+        async function begin() {
+            await playAudio();
+            actx.resume();
+        }
+
+        function init() {
+            const but = document.getElementById('but-begin');
+            but.addEventListener('click', begin);
+        }
+
+        window.addEventListener('load', init)
+    </script>
+</body>
+</html>
