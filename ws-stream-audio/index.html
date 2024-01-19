@@ -5,6 +5,7 @@
     <title>WS Audio Stream</title>
     <meta name="description" content="Experiments with audio streaming over WebSocket">
     <meta name="author" content="Borislav Stanimirov">
+    <!-- <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> -->
 </head>
 <body>
     <button style="font-size: 1.3em" id="but-begin">Begin</button>
@@ -17,8 +18,8 @@
         let audioWorklet = null;
 
         async function playAudio() {
-            await actx.audioWorklet.addModule('stream-worklet.js');
-            audioWorklet = new AudioWorkletNode(actx, 'stream-worklet');
+            await actx.audioWorklet.addModule('audio-stream-worklet.js');
+            audioWorklet = new AudioWorkletNode(actx, 'audio-stream-worklet');
             audioWorklet.connect(actx.destination);
         };
 
